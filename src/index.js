@@ -2,6 +2,7 @@ require("./config/database.js").connect();
 const Product = require("./models/product").Product;
 const http = require("http");
 const express = require("express");
+const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 
@@ -12,6 +13,8 @@ var cors = require("cors");
 
 var app = express();
 app.use(cors());
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 const server = http.createServer(app);
 
@@ -21,11 +24,11 @@ const myCache = new NodeCache();
 obj = { name: "Alexander", age: 42 };
 data = myCache.set("key", obj, 20000);
 
-app.get("/", async (req, res) => {
+app.get("/appendDemo", async (req, res) => {
   const certpath = path.join(__dirname, "/images/"); //must use absoulute path instead of relative
 
   var pr1 = await Product.create({
-    productName: "Pone",
+    productName: "Phone",
     productDescription:
       "the first ever product posted on the online market server made for haye bonda",
     price: 15,
@@ -56,14 +59,64 @@ app.get("/popular", (req, res) => {
   res.json({ products: "items" });
 });
 
-app.post("/api/upload", upload.array("images"), (req, res) => {
-  const name = req.body.name;
-  const description = req.body.description;
-  const images = req.files;
+app.post("/upload", upload.array("images"), async (req, res) => {
+  const name = req.body.productName;
+  const description = req.body.productDescription;
+  const price = req.body.price;
+  console.log("/upload reached");
 
-  console.log(req.files);
-  res.status(200).json({ message: "Form data received successfully" });
+  var imageBuffersArray = [];
+  req.files.forEach((file) => {
+    imageBuffersArray.push(file.filename);
+    // console.log("Fieldname:", file.fieldname);
+    // console.log("Originalname:", file.originalname);
+    // console.log("Encoding:", file.encoding);
+    // console.log("Mimetype:", file.mimetype);
+    // console.log("Size:", file.size);
+    // console.log("Destination:", file.destination);
+    // console.log("Filename:", file.filename);
+    // console.log("Path:", file.path);
+    // console.log("Buffer:", file.buffer);
+    // console.log("------------------------");
+  });
+  const uploadsFolderPath = path.resolve(__dirname, "../uploads"); //must use absoulute path instead of relative
+
+  var pr1 = await Product.create({
+    productName: name,
+    productDescription: description,
+    price: price,
+    thumbnail: {
+      imageData: fs.readFileSync(
+        uploadsFolderPath + "/" + imageBuffersArray[0],
+      ),
+      imageType: "jpg",
+    },
+
+    detailImages: [
+      {
+        imageData: fs.readFileSync(
+          uploadsFolderPath + "/" + imageBuffersArray[1],
+        ),
+        imageType: "jpg",
+      },
+      {
+        imageData: fs.readFileSync(
+          uploadsFolderPath + "/" + imageBuffersArray[2],
+        ),
+        imageType: "jpg",
+      },
+      {
+        imageData: fs.readFileSync(
+          uploadsFolderPath + "/" + imageBuffersArray[3],
+        ),
+        imageType: "jpg",
+      },
+    ],
+  });
+  console.log("product uploaded");
+  res.status(200).json({ product: "uploaded to the database" });
 });
+
 server.listen(8000, () => {
   console.log("server started");
 });
