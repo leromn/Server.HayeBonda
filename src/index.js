@@ -55,8 +55,19 @@ app.get("/appendDemo", async (req, res) => {
   res.json({ products: "added" });
 });
 
-app.get("/popular", (req, res) => {
-  res.json({ products: "items" });
+app.get("/popular", async (req, res) => {
+  var tempProducstCont = [];
+  await Product.find()
+    .limit(2)
+    .then((items) => {
+      tempProducstCont = items;
+      // console.log("Fetched items:", items);
+      items.forEach((item) => console.log(item.productName));
+    })
+    .catch((error) => {
+      console.error("Error fetching items:", error);
+    });
+  res.json({ products: tempProducstCont });
 });
 
 app.post("/upload", upload.array("images"), async (req, res) => {
