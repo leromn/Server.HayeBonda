@@ -7,9 +7,12 @@ const cache = new NodeCache();
 
 // Define routes for users
 router.get("/popular", async (req, res) => {
-  var cacheId = "popular";
   console.log("popular route contacted");
+  const pageNumber = req.query.page;
+  var itemsPerPage = 3;
+  var cacheId = "popular";
   const cachedFile = cache.get(cacheId);
+
   if (cachedFile) {
     console.log("File found in cache");
     res.json({ products: cachedFile });
@@ -17,9 +20,10 @@ router.get("/popular", async (req, res) => {
     console.log("File not found in cache");
     // Fetch the file from the database
     await Product.find({}, "-detailImages") //remember this  projection method others dont work
-      .limit(2)
+      .skip((pageNumber - 1) * itemsPerPage)
+      .limit(itemsPerPage)
       .then((items) => {
-        console.log(items);
+        console.log(pageNumber + " page items sent");
         res.json({ products: items });
       })
       .then((items) => {
