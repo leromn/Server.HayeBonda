@@ -16,9 +16,10 @@ router.get("/popular", async (req, res) => {
   } else {
     console.log("File not found in cache");
     // Fetch the file from the database
-    await Product.find({},{ projection: { detailImages: 0} })
+    await Product.find({}, "-detailImages") //remember this  projection method others dont work
       .limit(2)
       .then((items) => {
+        console.log(items);
         res.json({ products: items });
       })
       .then((items) => {
