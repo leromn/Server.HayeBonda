@@ -16,7 +16,7 @@ router.get("/popular", async (req, res) => {
   } else {
     console.log("File not found in cache");
     // Fetch the file from the database
-    await Product.find()
+    await Product.find({},{ projection: { detailImages: 0} })
       .limit(2)
       .then((items) => {
         res.json({ products: items });
