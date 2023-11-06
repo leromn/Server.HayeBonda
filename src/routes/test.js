@@ -9,13 +9,13 @@ const nodeCache = new NodeCache();
 // nodeCache.set("key", "value", 60000); // Cache will expire after 1 minute (60000 milliseconds)
 
 // Get a value from the cache using the key
-const cachedValue = nodeCache.get("key");
 // console.log(cachedValue); // Output: value
 
 // //////////////////////////////////
 
 // Define routes for users
 router.get("/check", (req, res) => {
+  const cachedValue = nodeCache.get("key");
   // Handle GET request for users
   const keyExists = cachedValue !== null && cachedValue !== undefined;
 
