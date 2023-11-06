@@ -2,10 +2,9 @@ require("./config/database.js").connect();
 const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
-
 var cors = require("cors");
+const NodeCache = require("node-cache");
+const cache = new NodeCache();
 
 var app = express();
 app.use(cors());
@@ -23,6 +22,6 @@ app.use("/home", homeRoutes);
 app.use("/upload", uploadRoute);
 app.use("/test", testRoute);
 
-server.listen(8001, () => {
+server.listen(8003, () => {
   console.log("server started");
 });

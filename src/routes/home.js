@@ -10,7 +10,7 @@ router.get("/popular", async (req, res) => {
   console.log("popular route contacted");
   const pageNumber = req.query.page;
   var itemsPerPage = 3;
-  var cacheId = "popular";
+  var cacheId = "popular" + pageNumber;
   const cachedFile = cache.get(cacheId);
 
   if (cachedFile) {
@@ -23,13 +23,17 @@ router.get("/popular", async (req, res) => {
       .skip((pageNumber - 1) * itemsPerPage)
       .limit(itemsPerPage)
       .then((items) => {
-        console.log(pageNumber + " page items sent");
+        // console.log(pageNumber + " page items sent");
         res.json({ products: items });
       })
       .then((items) => {
-        cache.set(cacheId, items);
-        console.log("File added to cache");
+        cache.set(cacheId, items, function (err, success) {
+          if (!err && success) {
+            console.log("successfully added products to cache added  to cache");
+          }
+        });
       })
+
       .catch((error) => {
         console.error("Error fetching items:", error);
       });

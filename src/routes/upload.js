@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-
+const fs = require("fs");
+const path = require("path");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
+const Product = require("../models/product").Product;
 
 router.post("/", upload.array("images"), async (req, res) => {
   const name = req.body.productName;
@@ -24,7 +26,7 @@ router.post("/", upload.array("images"), async (req, res) => {
     // console.log("Buffer:", file.buffer);
     // console.log("------------------------");
   });
-  const uploadsFolderPath = path.resolve(__dirname, "../uploads"); //must use absoulute path instead of relative
+  const uploadsFolderPath = path.resolve(__dirname, "../../uploads"); //must use absoulute path instead of relative
 
   var pr1 = await Product.create({
     productName: name,
