@@ -15,7 +15,7 @@ const cachedValue = nodeCache.get("key");
 // //////////////////////////////////
 
 // Define routes for users
-router.get("/", (req, res) => {
+router.get("/check", (req, res) => {
   // Handle GET request for users
   const keyExists = cachedValue !== null && cachedValue !== undefined;
 
@@ -27,9 +27,10 @@ router.get("/", (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.get("/create", (req, res) => {
   // Handle POST request for users
-  res.send("Create a new user");
+  nodeCache.set("key", "value", 60000);
+  res.send("Create a new cache");
 });
 
 // Export the router
