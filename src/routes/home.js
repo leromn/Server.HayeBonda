@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const Product = require("../models/product").Product;
+const Product_Top = require("../models/product").Product_Top;
+const Product_Pant = require("../models/product").Product_Pant;
+const Product_Dress = require("../models/product").Product_Dress;
+const Product_All = require("../models/product").Product_All;
 
 const NodeCache = require("node-cache");
 const cache = new NodeCache();
@@ -8,7 +11,20 @@ const cache = new NodeCache();
 // Define routes for users
 router.get("/popular", async (req, res) => {
   console.log("popular route contacted");
+
   const pageNumber = req.query.page;
+  const clothType = req.query.type;
+
+  var Product = null;
+  if (clothType == "all") {
+    Product = Product_All;
+  } else if (clothType == "top") {
+    Product = Product_Top;
+  } else if (clothType == "pant") {
+    Product = Product_Pant;
+  } else if (clothType == "dress") {
+    Product = Product_Dress;
+  }
   var itemsPerPage = 3;
   var cacheId = "popular" + pageNumber;
   const cachedFile = cache.get(cacheId);
@@ -20,11 +36,12 @@ router.get("/popular", async (req, res) => {
     console.log("File not found in cache");
     // Fetch the file from the database
     await Product.find({}, "-detailImages") //remember this  projection method others dont work
+      .sort({ createdAt: -1 })
       .skip((pageNumber - 1) * itemsPerPage)
       .limit(itemsPerPage)
       .then((items) => {
         // console.log(pageNumber + " page items sent");
-        res.json({ products: items });
+        res.json({ products: items }, { type: clothType });
       })
       .then((items) => {
         cache.set(cacheId, items, function (err, success) {
@@ -40,19 +57,37 @@ router.get("/popular", async (req, res) => {
   }
 });
 
-router.get("/recent", async (req, res) => {
-  var tempProducstCont = [];
-  await Product.find()
-    .limit(2)
-    .then((items) => {
-      tempProducstCont = items;
-      // console.log("Fetched items:", items);
-      items.forEach((item) => console.log(item.productName));
+router.get("/getProduct", async (req, res) => {
+  var clothType = req.query.type;
+  var productId = req.query.productId;
+
+  var Product = null;
+  if (clothType == "all") {
+    Product = Product_All;
+  } else if (clothType == "top") {
+    Product = Product_Top;
+  } else if (clothType == "pant") {
+    Product = Product_Pant;
+  } else if (clothType == "dress") {
+    Product = Product_Dress;
+  }
+  await Product.find({ _id: productId })
+    .then((item) => {
+      res.json({ product: item });
+      console.log(
+        "Item found and sent to client" +
+          "type=" +
+          clothType +
+          "id= " +
+          productId,
+        item[0],
+      );
+      return;
     })
-    .catch((error) => {
-      console.error("Error fetching items:", error);
+    .catch((err) => {
+      console.log("item not found " + err);
     });
-  res.json({ products: tempProducstCont });
 });
+
 // Export the router
 module.exports = router;

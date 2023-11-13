@@ -22,6 +22,8 @@ app.use("/home", homeRoutes);
 app.use("/upload", uploadRoute);
 app.use("/test", testRoute);
 
+console.log(Date.now);
+
 server.listen(8000, () => {
   console.log("server started");
 });
